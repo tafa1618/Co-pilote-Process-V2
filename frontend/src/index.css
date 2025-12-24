@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  background-color: #0b0b0f;
+}
+
+body {
+  @apply min-h-screen bg-onyx text-sand font-display antialiased;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(198, 161, 91, 0.25);
+  box-shadow: 0 30px 120px -45px rgba(0, 0, 0, 0.8);
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-gold px-4 py-2 text-sm font-semibold text-onyx transition hover:shadow-luxe active:scale-95;
+}
+
+.field {
+  @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-sand placeholder:text-sand/60 focus:border-gold/60 focus:outline-none;
+}
+

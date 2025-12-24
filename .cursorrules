@@ -1,0 +1,35 @@
+Règle de Sécurité Critique : No-Storage Policy : Interdiction d'utiliser la fonction shutil.copyfileobj ou d'écrire sur le disque. Tout traitement doit être fait via io.BytesIO.
+
+Auto-Promotion : Le compte Admin est défini par une variable d'environnement ADMIN_EMAIL.
+
+Isolation : Le Frontend ne reçoit jamais de données brutes des fichiers, seulement les KPI calculés et agrégés par le Backend.
+Project Manifest & Rules - KPI Automation Tool
+
+Stack Technique
+
+Backend: Python (FastAPI)
+
+Frontend: React (Vite) + Tailwind CSS + Shadcn/UI
+
+Data: Pandas (Traitement In-Memory), PostgreSQL (Persistance)
+
+Sécurité: OAuth2 (Domaine restreint)
+
+Règles de Sécurité Critiques
+
+No-Storage Policy: Interdiction formelle d'écrire les fichiers téléversés sur le disque. Tout traitement doit être fait en mémoire vive (RAM) via io.BytesIO et Pandas.
+
+Authentification: Seuls les emails @‌neemba.com sont autorisés.
+
+RBAC: L'email admin (défini en variable d'environnement) a les droits d'écriture/upload. Les autres sont GUEST (Lecture seule).
+
+Secrets: Ne jamais coder de clés en dur. Utiliser un fichier .env.
+
+Instructions de Développement
+
+Toujours mettre à jour ce fichier global ou le manifeste d'architecture au lieu de simplement ajouter des instructions éparses.
+
+Backend : Privilégier FastAPI pour l'asynchronisme.
+
+Frontend : Utiliser Tremor ou Shadcn pour les graphiques.
+
