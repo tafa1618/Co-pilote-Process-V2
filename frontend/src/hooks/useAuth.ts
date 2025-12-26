@@ -2,12 +2,20 @@ import { useCallback, useMemo, useState } from "react";
 import type { AuthState, User } from "../types";
 
 const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || "").trim().toLowerCase();
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
 
 export function useAuth(): AuthState {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const raw = sessionStorage.getItem("auth:user");
+      return raw ? (JSON.parse(raw) as User) : null;
+    } catch {
+      return null;
+    }
+  });
   const [error, setError] = useState<string | null>(null);
 
-  const login = useCallback((email: string) => {
+  const login = useCallback((email: string, adminPassword?: string) => {
     const normalized = email.trim().toLowerCase();
 
     if (!normalized.endsWith("@neemba.com")) {
@@ -16,14 +24,32 @@ export function useAuth(): AuthState {
       return;
     }
 
-    const role = ADMIN_EMAIL && normalized === ADMIN_EMAIL ? "admin" : "guest";
-    setUser({ email: normalized, role });
+    const isAdminEmail = ADMIN_EMAIL && normalized === ADMIN_EMAIL;
+    if (isAdminEmail && !(adminPassword || ADMIN_PASSWORD)) {
+      setError("Mot de passe admin requis");
+      setUser(null);
+      return;
+    }
+
+    const role: User["role"] = isAdminEmail ? "admin" : "guest";
+    const nextUser: User = { email: normalized, role, adminPassword: adminPassword || ADMIN_PASSWORD };
+    setUser(nextUser);
+    try {
+      sessionStorage.setItem("auth:user", JSON.stringify(nextUser));
+    } catch {
+      /* ignore */
+    }
     setError(null);
   }, []);
 
   const logout = useCallback(() => {
     setUser(null);
     setError(null);
+    try {
+      sessionStorage.removeItem("auth:user");
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   const isAdmin = useMemo(() => user?.role === "admin", [user]);

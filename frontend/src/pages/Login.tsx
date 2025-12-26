@@ -8,10 +8,11 @@ interface Props {
 
 export function Login({ onLogin, error }: Props) {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    onLogin(email);
+    onLogin(email, password || undefined);
   };
 
   return (
@@ -21,7 +22,7 @@ export function Login({ onLogin, error }: Props) {
           <Shield />
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-gold">SIGNARE SSO</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-gold">Neemba Copilote</p>
           <h1 className="text-xl font-semibold">Connexion sécurisée</h1>
         </div>
       </div>
@@ -37,6 +38,13 @@ export function Login({ onLogin, error }: Props) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+        />
+        <input
+          className="field"
+          type="password"
+          placeholder="Mot de passe admin (requis si admin)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
         {error && <p className="text-sm text-rose-200">{error}</p>}
         <button type="submit" className="btn-primary">

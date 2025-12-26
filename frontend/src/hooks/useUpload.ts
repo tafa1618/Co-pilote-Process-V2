@@ -1,7 +1,9 @@
 import { useCallback, useState } from "react";
 import type { UploadKpiResponse, User } from "../types";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+const DEFAULT_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || "admin@neemba.com").trim().toLowerCase();
+const DEFAULT_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
 
 interface UploadState {
   loading: boolean;
@@ -18,21 +20,20 @@ export function useUpload(user: User | null) {
 
   const upload = useCallback(
     async (file: File) => {
-      if (!user) {
-        setState((prev) => ({ ...prev, error: "Utilisateur non authentifié" }));
-        return;
-      }
-
       setState({ loading: true, error: null, result: null });
 
       const formData = new FormData();
       formData.append("file", file);
 
+      const email = (user?.email || DEFAULT_EMAIL).trim().toLowerCase();
+      const adminPwd = user?.adminPassword || DEFAULT_ADMIN_PASSWORD;
+
       try {
-        const response = await fetch(`${BACKEND_URL}/upload`, {
+        const response = await fetch(`${BACKEND_URL}/kpi/productivite/upload`, {
           method: "POST",
           headers: {
-            "X-User-Email": user.email,
+            "X-User-Email": email,
+            ...(adminPwd ? { "X-Admin-Password": adminPwd } : {}),
           },
           body: formData,
         });

@@ -1,12 +1,11 @@
-import { defineConfig } from "tailwindcss";
-
-export default defineConfig({
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        onyx: "#0B0B0F",
-        gold: "#C6A15B",
+        onyx: "#000000",
+        gold: "#FFD700",
         sand: "#F2E8DA",
       },
       fontFamily: {
@@ -18,5 +17,4 @@ export default defineConfig({
     },
   },
   plugins: [],
-});
-
+};

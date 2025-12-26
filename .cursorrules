@@ -33,3 +33,24 @@ Backend : Privilégier FastAPI pour l'asynchronisme.
 
 Frontend : Utiliser Tremor ou Shadcn pour les graphiques.
 
+# INSTRUCTIONS IMPÉRATIVES : PROJET NEEMBA SÉNÉGAL
+
+## CONTEXTE EXCLUSIF
+- Ce projet n'a AUCUN lien avec "SIGNARE". 
+- Toute mention de "Signare" ou utilisation de son design est une erreur grave.
+- Client : Neemba Sénégal.
+- Couleurs : Jaune (#FFD700) et Noir.
+
+## RÈGLES DE GÉNÉRATION
+- Ne regarde pas les fichiers en dehors du dossier "Co-pilote-Process-V2".
+- Si tu trouves une référence à "Signare" dans le code actuel, change-la immédiatement en "Neemba Copilote".
+- L'en-tête doit TOUJOURS être : "Bienvenue au Co-Pilote Méthode et Process Neemba Sénégal".
+
+## SÉCURITÉ
+- Utilise l'email pro pour l'admin (conformément aux échanges précédents). et demande un mot de passe qu'il faudra définir
+
+## DATA SCHEMA - PRODUCTIVITÉ
+- Colonnes clés : 'Saisie heures - Date', 'Salarié - Nom', 'Salarié - Equipe(Nom)', 'Facturable', 'Hr_travaillée'.
+- Formule : Productivité = Facturable / Hr_travaillée.
+- Target SEP : 85% (Excellent), 82% (Advanced), 78% (Emerging).
+
