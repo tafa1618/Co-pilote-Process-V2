@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
 interface KPICardProps {
     name: string;
@@ -13,6 +14,7 @@ interface KPICardProps {
     data_source: string;
     mode: 'calculated' | 'manual';
     description: string;
+    weekly_change?: number;  // % change from last week
     onClick?: () => void;
 }
 
@@ -29,6 +31,7 @@ const KPICard: React.FC<KPICardProps> = ({
     data_source,
     mode,
     description,
+    weekly_change,
     onClick
 }) => {
     const getPerformanceColor = () => {
@@ -82,6 +85,27 @@ const KPICard: React.FC<KPICardProps> = ({
                         {value}
                     </span>
                     <span className="text-lg text-sand/70">{unit}</span>
+
+                    {/* Weekly Variation Badge */}
+                    {typeof weekly_change === 'number' && weekly_change !== 0 && (
+                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold ${weekly_change > 0
+                                ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                                : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                            }`}>
+                            {weekly_change > 0 ? (
+                                <ArrowUp size={12} />
+                            ) : (
+                                <ArrowDown size={12} />
+                            )}
+                            {Math.abs(weekly_change).toFixed(1)}%
+                        </span>
+                    )}
+                    {typeof weekly_change === 'number' && weekly_change === 0 && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-gray-500/20 text-gray-300 border border-gray-500/30">
+                            <Minus size={12} />
+                            Stable
+                        </span>
+                    )}
                 </div>
             </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card } from "@tremor/react";
-import { TrendingUp, Clock, Users, Target, CheckCircle2, FileInvoice } from "lucide-react";
+import { TrendingUp, Clock, Users, Target, CheckCircle2, FileText } from "lucide-react";
 import { fetchProductivity, fetchInspectionSnapshot, getInspectionRateBadge, fetchLltiSnapshot, getLltiBadge } from "../services/analytics";
 import type { User } from "../types";
 
@@ -155,7 +155,7 @@ export function KpiSnapshot({ user }: KpiSnapshotProps) {
       <Card className="bg-black/40 border-gold/20">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-lg ${lltiBadge.bgColor}`}>
-            <FileInvoice size={20} className={lltiBadge.color} />
+            <FileText size={20} className={lltiBadge.color} />
           </div>
           <div>
             <p className="text-xs text-sand/60 uppercase">LLTI (jours)</p>

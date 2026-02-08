@@ -36,7 +36,8 @@ class MockSEPDataService:
                             "time_period": "YTD",
                             "data_source": "Self-Reported",
                             "mode": "manual",  # Fourni directement
-                            "description": "Recordable Injury Frequency"
+                            "description": "Recordable Injury Frequency",
+                            "weekly_change": -5.2  # Amélioration semaine dernière
                         },
                         "tech_productivity": {
                             "name": "Technician Productivity",
@@ -50,7 +51,8 @@ class MockSEPDataService:
                             "time_period": "R-12",
                             "data_source": "Self-Reported",
                             "mode": "calculated",
-                            "description": "Billable Hours / Total Hours"
+                            "description": "Billable Hours / Total Hours",
+                            "weekly_change": -2.1  # Baisse détectée
                         },
                         "tech_capacity": {
                             "name": "Technician Capacity (Tech Plan)",
@@ -64,7 +66,8 @@ class MockSEPDataService:
                             "time_period": "YTD",
                             "data_source": "TAP Tool",
                             "mode": "calculated",
-                            "description": "Actual Techs / Planned Techs"
+                            "description": "Actual Techs / Planned Techs",
+                            "weekly_change": 1.5
                         },
                         "llti": {
                             "name": "Last Labor to Invoice",
@@ -78,7 +81,8 @@ class MockSEPDataService:
                             "time_period": "Quarterly",
                             "data_source": "CDDW",
                             "mode": "calculated",
-                            "description": "Avg(Invoice Date - Last Labor Date)"
+                            "description": "Avg(Invoice Date - Last Labor Date)",
+                            "weekly_change": 8.3  # Ralentissement (!)
                         },
                         "tech_capability": {
                             "name": "Technician Capability (TCDPA)",
@@ -92,7 +96,8 @@ class MockSEPDataService:
                             "time_period": "Quarterly",
                             "data_source": "TCDPA SharePoint",
                             "mode": "manual",  # Fourni directement
-                            "description": "TCDPA Points / Total Points"
+                            "description": "TCDPA Points / Total Points",
+                            "weekly_change": 0.0
                         },
                         "data_quality": {
                             "name": "Service Data Quality",
@@ -106,7 +111,8 @@ class MockSEPDataService:
                             "time_period": "Quarterly",
                             "data_source": "CDDW",
                             "mode": "calculated",
-                            "description": "Valid Records / Total Records"
+                            "description": "Valid Records / Total Records",
+                            "weekly_change": 3.2
                         }
                     }
                 },
@@ -127,7 +133,8 @@ class MockSEPDataService:
                             "time_period": "Quarterly",
                             "data_source": "Self-Reported",
                             "mode": "manual",  # Fourni directement
-                            "description": "Started by 2nd Day / Total Unplanned (Group 1)"
+                            "description": "Started by 2nd Day / Total Unplanned (Group 1)",
+                            "weekly_change": -3.5
                         },
                         "remote_flash": {
                             "name": "Remote Service (Flash)",
@@ -141,7 +148,8 @@ class MockSEPDataService:
                             "time_period": "YTD",
                             "data_source": "Automated",
                             "mode": "calculated",
-                            "description": "Successful Flashes / Opportunities"
+                            "description": "Successful Flashes / Opportunities",
+                            "weekly_change": 6.2
                         },
                         "remote_troubleshoot": {
                             "name": "Remote Service (Troubleshoot)",
@@ -155,7 +163,8 @@ class MockSEPDataService:
                             "time_period": "YTD",
                             "data_source": "Automated",
                             "mode": "calculated",
-                            "description": "Successful Sessions / Opportunities"
+                            "description": "Successful Sessions / Opportunities",
+                            "weekly_change": -1.8
                         },
                         "cva_fulfillment": {
                             "name": "CVA Fulfillment",
@@ -169,7 +178,8 @@ class MockSEPDataService:
                             "time_period": "R-12",
                             "data_source": "Automated",
                             "mode": "calculated",
-                            "description": "(SOS% + Inspection% + Connectivity%) / 3"
+                            "description": "(SOS% + Inspection% + Connectivity%) / 3",
+                            "weekly_change": 2.4
                         },
                         "cva_pm_accuracy": {
                             "name": "CVA PM Accuracy",
@@ -183,7 +193,8 @@ class MockSEPDataService:
                             "time_period": "Quarterly",
                             "data_source": "CDDW",
                             "mode": "calculated",
-                            "description": "PM Events ±50hrs / Total PM Events"
+                            "description": "PM Events ±50hrs / Total PM Events",
+                            "weekly_change": 0.0
                         },
                         "inspection_rate": {
                             "name": "Inspection Rate",
@@ -197,7 +208,8 @@ class MockSEPDataService:
                             "time_period": "Quarterly",
                             "data_source": "CDDW",
                             "mode": "calculated",
-                            "description": "Inspections / Expected Inspections"
+                            "description": "Inspections / Expected Inspections",
+                            "weekly_change": 12.7  # Belle progression!
                         },
                         "cma_recommendation": {
                             "name": "CMA Recommendation Coverage",
@@ -211,7 +223,8 @@ class MockSEPDataService:
                             "time_period": "YTD",
                             "data_source": "Automated",
                             "mode": "manual",  # Fourni directement
-                            "description": "OLGA $ with CMA / Total OLGA $"
+                            "description": "OLGA $ with CMA / Total OLGA $",
+                            "weekly_change": 4.1
                         }
                     }
                 }

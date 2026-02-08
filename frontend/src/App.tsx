@@ -1,6 +1,6 @@
-import { Layers } from "lucide-react";
+import { Layers, LogOut } from "lucide-react";
 import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
+import { Login } from "./pages/Login";
 import SEPDashboard from "./pages/SEPDashboard";
 import TestDashboard from "./pages/TestDashboard";
 import { useAuth } from "./hooks/useAuth";
@@ -10,25 +10,23 @@ import SuiviSepMeeting from "./pages/SuiviSepMeeting";
 import InspectionDetail from "./pages/InspectionDetail";
 import LltiDetail from "./pages/LltiDetail";
 
-// ⚠️ IMPORTANT : Liste des emails autorisés pour accéder à SuiviSepMeeting
-// Ajoutez les emails autorisés dans cette liste (doit correspondre au backend)
+// ⚠️ IMPORTANT : Liste des emails autorisés pour accéder à SuiviSepMeeting et Admin
+// Seul admin-sep@neemba.com dispose des droits administrateur complets
 const ALLOWED_ADMINS = [
-  (import.meta.env.VITE_ADMIN_EMAIL || "admin@neemba.com").trim().toLowerCase(),
-  // Exemple : ajouter d'autres emails autorisés ici
-  // "manager@neemba.com",
-  // "directeur@neemba.com",
-  // "superviseur@neemba.com",
-].filter(Boolean);
+  "admin-sep@neemba.com",  // Admin SEP avec droits complets (gestion fichiers + agents)
+  // Ajoutez d'autres administrateurs ici si nécessaire
+].map(email => email.trim().toLowerCase());
 
 function App() {
   const auth = useAuth();
   const [view, setView] = useState<"dashboard" | "test" | "sep" | "productivity" | "sepm" | "inspection" | "llti">("sep");
 
+  console.log("🔍 App rendering - auth.user:", auth.user);
+
   const canAccessSepm = useMemo(() => {
     if (!auth.user?.email) return false;
     const userEmail = auth.user.email.toLowerCase();
     const isAllowed = ALLOWED_ADMINS.includes(userEmail);
-    // Debug: afficher dans la console pour vérifier
     console.log("🔍 Debug Suivi SEP Meeting:", {
       userEmail,
       allowedAdmins: ALLOWED_ADMINS,
@@ -69,43 +67,40 @@ function App() {
                     >
                       📊 Dashboard SEP
                     </button>
+
+                    {/* Admin button - only visible for admin users */}
+                    {canAccessSepm && (
+                      <button
+                        onClick={() => setView("sepm")}
+                        className="px-4 py-2 rounded-lg font-semibold transition-all border bg-cat-yellow text-onyx hover:bg-cat-yellow/90 border-cat-yellow"
+                        title="Suivi SEP Meeting"
+                      >
+                        📋 Admin
+                      </button>
+                    )}
+
                     <button
-                      onClick={() => {
-                        if (canAccessSepm) {
-                          setView("sepm");
-                        } else {
-                          alert("Accès restreint aux administrateurs");
-                        }
-                      }}
-                      className={`px-4 py-2 rounded-lg font-semibold transition-all border ${canAccessSepm
-                        ? "bg-cat-yellow text-onyx hover:bg-cat-yellow/90 border-cat-yellow"
-                        : "bg-gray-700 text-gray-400 border-gray-600 cursor-not-allowed opacity-60"
-                        }`}
-                      title={canAccessSepm ? "Suivi SEP Meeting" : "Accès administrateur requis"}
+                      onClick={auth.logout}
+                      className="px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 font-semibold transition-all border border-red-500/30 flex items-center gap-2"
+                      title="Déconnexion"
                     >
-                      📋 Admin
+                      <LogOut size={18} />
                     </button>
                   </>
                 )}
-                <div className="h-8 w-8 rounded-full bg-cat-yellow/20 flex items-center justify-center text-cat-yellow text-xs font-bold">
-                  {auth.user?.email?.[0]?.toUpperCase() || "?"}
-                </div>
+                {auth.user && (
+                  <div className="h-8 w-8 rounded-full bg-cat-yellow/20 flex items-center justify-center text-cat-yellow text-xs font-bold">
+                    {auth.user?.email?.[0]?.toUpperCase() || "?"}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Main Content */}
-        <SEPDashboard
-          user={{ email: "admin@neemba.com", name: "Admin" }}
-          isAdmin={true}
-        />
-
-        {/* Original routing (commented for debug)
+        {/* Main Content - Routing based on authentication */}
         {auth.user ? (
-          view === "test" ? (
-            <TestDashboard />
-          ) : view === "sep" ? (
+          view === "sep" ? (
             <SEPDashboard user={auth.user} isAdmin={canAccessSepm} />
           ) : view === "dashboard" ? (
             <Dashboard
@@ -127,7 +122,6 @@ function App() {
         ) : (
           <Login onLogin={auth.login} error={auth.error} />
         )}
-        */}
       </div>
     </div>
   );
