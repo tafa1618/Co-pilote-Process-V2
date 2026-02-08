@@ -5,7 +5,8 @@ module.exports = {
     extend: {
       colors: {
         onyx: "#000000",
-        gold: "#FFD700",
+        "cat-yellow": "#FFCD11", // Official-ish Caterpillar Yellow
+        gold: "#FFD700", // Plan approved backup
         sand: "#F2E8DA",
       },
       fontFamily: {

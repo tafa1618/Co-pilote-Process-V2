@@ -12,9 +12,10 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "types": ["vite/client"]
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["src"],
+  "include": ["src", "src/**/*.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
 

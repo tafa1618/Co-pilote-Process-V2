@@ -1,103 +1,136 @@
 import { Layers } from "lucide-react";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import SEPDashboard from "./pages/SEPDashboard";
+import TestDashboard from "./pages/TestDashboard";
 import { useAuth } from "./hooks/useAuth";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import ProductivityDetail from "./pages/ProductivityDetail";
+import SuiviSepMeeting from "./pages/SuiviSepMeeting";
+import InspectionDetail from "./pages/InspectionDetail";
+import LltiDetail from "./pages/LltiDetail";
+
+// ⚠️ IMPORTANT : Liste des emails autorisés pour accéder à SuiviSepMeeting
+// Ajoutez les emails autorisés dans cette liste (doit correspondre au backend)
+const ALLOWED_ADMINS = [
+  (import.meta.env.VITE_ADMIN_EMAIL || "admin@neemba.com").trim().toLowerCase(),
+  // Exemple : ajouter d'autres emails autorisés ici
+  // "manager@neemba.com",
+  // "directeur@neemba.com",
+  // "superviseur@neemba.com",
+].filter(Boolean);
 
 function App() {
   const auth = useAuth();
-  const [view, setView] = useState<"dashboard" | "productivity">("dashboard");
+  const [view, setView] = useState<"dashboard" | "test" | "sep" | "productivity" | "sepm" | "inspection" | "llti">("sep");
+
+  const canAccessSepm = useMemo(() => {
+    if (!auth.user?.email) return false;
+    const userEmail = auth.user.email.toLowerCase();
+    const isAllowed = ALLOWED_ADMINS.includes(userEmail);
+    // Debug: afficher dans la console pour vérifier
+    console.log("🔍 Debug Suivi SEP Meeting:", {
+      userEmail,
+      allowedAdmins: ALLOWED_ADMINS,
+      isAllowed,
+    });
+    return isAllowed;
+  }, [auth.user?.email]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-onyx to-black px-4 py-8">
-      <div className="mx-auto max-w-5xl space-y-8">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold/20 text-gold">
-              <Layers />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-gold">Neemba Copilote</p>
-              <h1 className="text-xl font-semibold text-sand">
-                Bienvenue au Co-Pilote Méthode et Process Neemba Sénégal
-              </h1>
+    <div className="min-h-screen bg-onyx">
+      <div className="space-y-0">
+        {/* Modern NEEMBA CAT Header */}
+        <header className="bg-gradient-to-r from-onyx to-black border-b-2 border-cat-yellow/30">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              {/* Logo and Title */}
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 bg-cat-yellow rounded-xl flex items-center justify-center shadow-lg">
+                  <Layers className="text-onyx" size={28} />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-black text-white">
+                    NEEMBA <span className="text-cat-yellow">CAT</span>
+                  </h1>
+                  <p className="text-xs text-cat-yellow/70 uppercase tracking-wider font-semibold">
+                    Digital Twin • Service Excellence Program
+                  </p>
+                </div>
+              </div>
+
+              {/* User Actions */}
+              <div className="flex items-center gap-3">
+                {auth.user && (
+                  <>
+                    <button
+                      onClick={() => setView("sep")}
+                      className="px-4 py-2 rounded-lg bg-cat-yellow/10 hover:bg-cat-yellow/20 text-cat-yellow font-semibold transition-all border border-cat-yellow/30"
+                    >
+                      📊 Dashboard SEP
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (canAccessSepm) {
+                          setView("sepm");
+                        } else {
+                          alert("Accès restreint aux administrateurs");
+                        }
+                      }}
+                      className={`px-4 py-2 rounded-lg font-semibold transition-all border ${canAccessSepm
+                        ? "bg-cat-yellow text-onyx hover:bg-cat-yellow/90 border-cat-yellow"
+                        : "bg-gray-700 text-gray-400 border-gray-600 cursor-not-allowed opacity-60"
+                        }`}
+                      title={canAccessSepm ? "Suivi SEP Meeting" : "Accès administrateur requis"}
+                    >
+                      📋 Admin
+                    </button>
+                  </>
+                )}
+                <div className="h-8 w-8 rounded-full bg-cat-yellow/20 flex items-center justify-center text-cat-yellow text-xs font-bold">
+                  {auth.user?.email?.[0]?.toUpperCase() || "?"}
+                </div>
+              </div>
             </div>
           </div>
-          <span className="rounded-full border border-gold/30 px-3 py-1 text-xs text-gold">
-            -----
-          </span>
         </header>
 
-        <section
-  className="relative overflow-hidden rounded-3xl border border-[#FFD700]/20 shadow-2xl"
-  style={{
-    // Cette image montre un vrai tombereau de chantier (Yellow Machine)
-    backgroundImage: `linear-gradient(120deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 100%), url('https://images.unsplash.com/photo-1532635042-a6f6abd57685?auto=format&fit=crop&w=1600&q=80')`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  }}
->
-  <div className="flex flex-col gap-6 px-8 py-12 md:flex-row md:items-center md:justify-between relative z-10">
-    <div className="max-w-2xl space-y-4">
-      <div className="flex items-center gap-2">
-        <span className="h-1 w-8 bg-[#FFD700]"></span>
-        <p className="text-xs uppercase tracking-[0.3em] text-[#FFD700] font-bold">Neemba Sénégal · Productivité</p>
-      </div>
-      
-      
-      
-      <p className="text-base text-gray-300 max-w-lg">
-        Analyse de la productivité selon les es standards SEP 2025. 
-        L'excellence opérationnelle commence par la précision des chiffres.
-      </p>
+        {/* Main Content */}
+        <SEPDashboard
+          user={{ email: "admin@neemba.com", name: "Admin" }}
+          isAdmin={true}
+        />
 
-      <div className="flex flex-wrap gap-3 pt-2">
-        <span className="rounded-md bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs text-white">
-          Caterpillar Excellence
-        </span>
-        <span className="rounded-md bg-[#FFD700]/10 backdrop-blur-md border border-[#FFD700]/30 px-4 py-1.5 text-xs text-[#FFD700]">
-          Reporting @neemba.com
-        </span>
-      </div>
-    </div>
-    
-    {/* La carte d'accès à droite */}
-    <div className="bg-black/60 backdrop-blur-xl rounded-2xl p-6 border border-white/10 md:w-80 shadow-2xl">
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <span className="text-gray-400 text-xs uppercase font-medium">Flux de données</span>
-          <span className="flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-yellow-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-          </span>
-        </div>
-        <p className="text-sm text-gray-200">
-          En attente d'importation des fichiers <code className="text-[#FFD700]">.xlsx</code>
-        </p>
-        <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-yellow-600 to-[#FFD700] w-[65%]"></div>
-        </div>
-        <p className="text-[11px] text-gray-400 italic leading-tight">
-          La productivité est calculée sur une période glissante de 12 mois (Rolling 12-months).
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
+        {/* Original routing (commented for debug)
         {auth.user ? (
-          view === "dashboard" ? (
-            <Dashboard auth={auth} onOpenProductivity={() => setView("productivity")} />
-          ) : (
-            <ProductivityDetail auth={auth} onBack={() => setView("dashboard")} />
-          )
+          view === "test" ? (
+            <TestDashboard />
+          ) : view === "sep" ? (
+            <SEPDashboard user={auth.user} isAdmin={canAccessSepm} />
+          ) : view === "dashboard" ? (
+            <Dashboard
+              auth={auth}
+              onOpenProductivity={() => setView("productivity")}
+              onOpenSepm={canAccessSepm ? () => setView("sepm") : undefined}
+              onOpenInspection={() => setView("inspection")}
+              onOpenLlti={() => setView("llti")}
+            />
+          ) : view === "productivity" ? (
+            <ProductivityDetail auth={auth} onBack={() => setView("sep")} />
+          ) : view === "sepm" ? (
+            <SuiviSepMeeting auth={auth} onBack={() => setView("sep")} />
+          ) : view === "inspection" ? (
+            <InspectionDetail auth={auth} onBack={() => setView("sep")} />
+          ) : view === "llti" ? (
+            <LltiDetail auth={auth} onBack={() => setView("sep")} />
+          ) : null
         ) : (
           <Login onLogin={auth.login} error={auth.error} />
         )}
+        */}
       </div>
     </div>
   );
 }
 
 export default App;
-

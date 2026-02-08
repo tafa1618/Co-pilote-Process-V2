@@ -1,43 +1,60 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 import { Select, SelectItem } from "@tremor/react";
-import { fetchProductivity, type ProductivityPayload } from "../services/analytics";
+import { fetchAvailableQuarters, fetchInspectionTeams, type Quarter } from "../services/analytics";
 import type { AuthState } from "../types";
 
 const STREAMLIT_URL = import.meta.env.VITE_STREAMLIT_URL || "http://localhost:8501";
 
-function ProductivityDetail({
+function InspectionDetail({
   auth,
   onBack,
 }: {
   auth: AuthState;
   onBack: () => void;
 }) {
-  const [data, setData] = useState<ProductivityPayload | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [availableQuarters, setAvailableQuarters] = useState<Quarter[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedQuarter, setSelectedQuarter] = useState<number | null>(null);
+  const [availableTeams, setAvailableTeams] = useState<string[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProductivity(auth.user)
+    fetchAvailableQuarters(auth.user)
       .then((res) => {
-        setData(res);
+        setAvailableQuarters(res.quarters);
+        if (res.quarters.length > 0) {
+          const current = res.quarters[0];
+          setSelectedYear(current.year);
+          setSelectedQuarter(current.quarter);
+        }
       })
       .catch((err) => {
-        console.error("Erreur chargement productivité:", err);
+        console.error("Erreur chargement trimestres:", err);
+      });
+
+    fetchInspectionTeams(auth.user)
+      .then((teams) => {
+        setAvailableTeams(teams);
+      })
+      .catch((err) => {
+        console.error("Erreur chargement équipes:", err);
       });
   }, [auth.user]);
 
   // Construire l'URL de l'iframe avec les paramètres
   const iframeUrl = (() => {
     const params = new URLSearchParams();
-    params.set("kpi", "productivity");
-    if (selectedMonth) params.set("month", selectedMonth);
+    params.set("kpi", "inspection");
+    if (selectedYear) params.set("year", String(selectedYear));
+    if (selectedQuarter) params.set("quarter", String(selectedQuarter));
     if (selectedTeam) params.set("team", selectedTeam);
     return `${STREAMLIT_URL}?${params.toString()}`;
   })();
 
-  const availableMonths = data?.exhaustivity?.periods || [];
-  const availableTeams = data?.teams?.map((t) => t["Salarié - Equipe(Nom)"]) || [];
+  const currentQuarter = availableQuarters.find(
+    (q) => q.year === selectedYear && q.quarter === selectedQuarter
+  );
 
   return (
     <div className="space-y-6 pb-20 max-w-[1600px] mx-auto">
@@ -50,21 +67,25 @@ function ProductivityDetail({
           >
             <ArrowLeft size={16} /> Retour au dashboard
           </button>
-          <h2 className="text-3xl font-bold text-white">Productivité</h2>
-          <p className="text-sand/60 text-sm">Analyse détaillée de la productivité</p>
+          <h2 className="text-3xl font-bold text-white">Inspection Rate</h2>
+          <p className="text-sand/60 text-sm">KPI Trimestriel - Taux d'inspection des matériels</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
+          <Calendar className="text-gold" size={20} />
           <Select
-            value={selectedMonth || "all"}
+            value={currentQuarter?.label || ""}
             onValueChange={(v: string) => {
-              setSelectedMonth(v === "all" ? null : v);
+              const q = availableQuarters.find((q) => q.label === v);
+              if (q) {
+                setSelectedYear(q.year);
+                setSelectedQuarter(q.quarter);
+              }
             }}
             className="w-48 bg-black/60 border-gold/20"
           >
-            <SelectItem value="all">Tous les mois</SelectItem>
-            {availableMonths.map((month) => (
-              <SelectItem key={month} value={month}>
-                {month}
+            {availableQuarters.map((q) => (
+              <SelectItem key={q.label} value={q.label}>
+                {q.label}
               </SelectItem>
             ))}
           </Select>
@@ -90,7 +111,7 @@ function ProductivityDetail({
         <iframe
           src={iframeUrl}
           className="w-full h-full border-0"
-          title="Productivity Detail"
+          title="Inspection Rate Detail"
           allow="fullscreen"
         />
       </div>
@@ -98,4 +119,4 @@ function ProductivityDetail({
   );
 }
 
-export default ProductivityDetail;
+export default InspectionDetail;

@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from config import ADMIN_EMAIL, ADMIN_PASSWORD, EXEMPT_PATHS, ALLOWED_ADMINS
 from database import ensure_schema
-from routes import productivity, inspection, upload, lean_actions, meeting_summary, llti
+from routes import productivity, inspection, upload, lean_actions, meeting_summary
 
 # ==================================================
 # APP
@@ -65,32 +65,7 @@ async def health():
 # ==================================================
 app.include_router(productivity.router)
 app.include_router(inspection.router)
-app.include_router(llti.router)
 app.include_router(upload.router)
 app.include_router(lean_actions.router)
 app.include_router(meeting_summary.router)
-
-from agents.mock_agent import MockAgentService
-@app.get("/api/analyze/mock", tags=["Analysis"])
-def get_mock_analysis():
-    return MockAgentService.get_analysis()
-
-# SEP Digital Twin Endpoints
-@app.get("/api/sep/kpis", tags=["SEP"])
-def get_sep_kpis():
-    """Get all SEP KPIs (12 official metrics)"""
-    from services.mock_sep_data import MockSEPDataService
-    return MockSEPDataService.get_sep_kpis()
-
-@app.get("/api/sep/custom-kpis", tags=["SEP"])
-def get_custom_kpis():
-    """Get custom internal KPIs"""
-    from services.mock_sep_data import MockSEPDataService
-    return MockSEPDataService.get_custom_kpis()
-
-@app.get("/api/sep/insights", tags=["SEP"])
-def get_agent_insights():
-    """Get agent insights and recommendations"""
-    from services.mock_sep_data import MockSEPDataService
-    return MockSEPDataService.get_agent_insights()
 

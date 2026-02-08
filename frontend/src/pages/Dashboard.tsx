@@ -1,9 +1,11 @@
+import React from "react";
 import { LogOut, Sparkles, Activity, TrendingUp } from "lucide-react";
 import { AreaChart, Card, CategoryBar, ProgressCircle } from "@tremor/react";
 import UploadArea from "../components/UploadArea";
+import AgentInsightsPanel from "../components/AgentInsightsPanel";
 import type { AuthState } from "../types";
 import { useEffect, useMemo, useState } from "react";
-import { fetchProductivity } from "../services/analytics";
+import { fetchProductivity, fetchInspectionSnapshot, getInspectionRateBadge, fetchLltiSnapshot, getLltiBadge } from "../services/analytics";
 
 type Granularity = "Mensuel" | "Trimestriel" | "YTD";
 
@@ -34,24 +36,17 @@ const chartData: Record<Granularity, Array<{ mois: string; performance: number }
   ],
 };
 
-const kpis = Array.from({ length: 15 }, (_, i) => {
-  const base = 70 + Math.round(Math.random() * 25);
-  const delta = Math.round((Math.random() - 0.5) * 6 * 10) / 10;
-  return {
-    id: `kpi-${i + 1}`,
-    label: `KPI${i + 1}`,
-    value: base,
-    delta,
-    trend: [base - 8, base - 4, base - 2, base],
-  };
-});
+// Les KPIs seront ajoutés au fur et à mesure
 
 interface Props {
   auth: AuthState;
   onOpenProductivity: () => void;
+  onOpenSepm?: () => void;
+  onOpenInspection?: () => void;
+  onOpenLlti?: () => void;
 }
 
-export function Dashboard({ auth, onOpenProductivity }: Props) {
+export function Dashboard({ auth, onOpenProductivity, onOpenSepm, onOpenInspection, onOpenLlti }: Props) {
   const { user, logout, isAdmin } = auth;
   const [granularity, setGranularity] = useState<Granularity>("Mensuel");
   const [prodValue, setProdValue] = useState<number | null>(null);
@@ -59,10 +54,74 @@ export function Dashboard({ auth, onOpenProductivity }: Props) {
   const [prodLoading, setProdLoading] = useState(false);
   const [prodError, setProdError] = useState<string | null>(null);
 
+  // États pour Inspection Rate
+  const [inspRate, setInspRate] = useState<number | null>(null);
+  const [inspDelta, setInspDelta] = useState<number | null>(null);
+  const [inspLoading, setInspLoading] = useState(false);
+  const [inspError, setInspError] = useState<string | null>(null);
+
+  // États pour LLTI
+  const [lltiMoyenne, setLltiMoyenne] = useState<number | null>(null);
+  const [lltiStatus, setLltiStatus] = useState<string | null>(null);
+  const [lltiLoading, setLltiLoading] = useState(false);
+  const [lltiError, setLltiError] = useState<string | null>(null);
+
   const data = useMemo(() => chartData[granularity], [granularity]);
 
+  const [mockData, setMockData] = useState<any>(null);
+  const [mockLoading, setMockLoading] = useState(false);
+
+  const MOCK_DATA_FALLBACK = {
+    kpis: {
+      productivity: { value: 85.0, target: 90.0, unit: "%", trend: "down", label: "Productivité Globale" },
+      inspection: { value: 120, target: 100, unit: "dossiers", trend: "up", label: "Dossiers Inspectés" },
+      llti: { value: 4.5, target: 3.0, unit: "jours", trend: "down", label: "LLTI Moyen" }
+    },
+    insights: [
+      { id: 1, agent: "PerformanceWatcher", type: "warning", message: "Baisse de productivité détectée sur l'équipe A le mardi après-midi.", details: "Analyse des données sur 4 semaines montrant un pattern récurrent." },
+      { id: 2, agent: "QualityGuardian", type: "success", message: "Le taux d'inspection a dépassé l'objectif de 20% cette semaine.", details: "Excellente performance suite à la mise en place du nouveau process." },
+      { id: 3, agent: "ProcessOptimizer", type: "info", message: "Potentiel goulot d'étranglement identifié à l'étape de validation.", details: "Le temps moyen de validation a augmenté de 15%." }
+    ],
+    actions: [
+      { id: 101, title: "Réorganiser les shifts du mardi", priority: "High", status: "Proposed", owner: "Manager Equipe A", description: "Décaler la pause de 15min pour éviter le creux de 15h." },
+      { id: 102, title: "Formation express Inspection", priority: "Medium", status: "Proposed", owner: "Responsable Qualité", description: "Partager les bonnes pratiques de la semaine avec les autres équipes." }
+    ]
+  };
+
   useEffect(() => {
+    // Mode DEMO / VALIDATION : On charge les données mockées pour tout le dashboard
+    setMockLoading(true);
     setProdLoading(true);
+    setInspLoading(true);
+    setLltiLoading(true);
+
+    const applyMockData = (data: any) => {
+      setMockData(data);
+      if (data.kpis) {
+        if (data.kpis.productivity) setProdValue(data.kpis.productivity.value);
+        if (data.kpis.inspection) setInspRate(data.kpis.inspection.value);
+        if (data.kpis.llti) setLltiMoyenne(data.kpis.llti.value);
+      }
+    };
+
+    fetch("http://localhost:8000/api/analyze/mock")
+      .then((res) => res.json())
+      .then((data) => applyMockData(data))
+      .catch((err) => {
+        console.error("Mock fetch error, using fallback", err);
+        applyMockData(MOCK_DATA_FALLBACK);
+      })
+      .finally(() => {
+        setMockLoading(false);
+        setProdLoading(false);
+        setInspLoading(false);
+        setLltiLoading(false);
+      });
+
+    // On garde les fetchs réels en parallèle ou on les commente pour l'étape 1?
+    // Pour "Validation Layout", on force le mock.
+
+    /*
     fetchProductivity(user)
       .then((payload) => {
         const monthly = payload.monthly;
@@ -80,6 +139,29 @@ export function Dashboard({ auth, onOpenProductivity }: Props) {
       })
       .catch((err) => setProdError(err.message))
       .finally(() => setProdLoading(false));
+
+    // Charger les données Inspection Rate
+    setInspLoading(true);
+    fetchInspectionSnapshot(user)
+      .then((data) => {
+        setInspRate(data.inspection_rate);
+        setInspDelta(data.delta_weekly);
+        setInspError(null);
+      })
+      .catch((err) => setInspError(err.message))
+      .finally(() => setInspLoading(false));
+
+    // Charger les données LLTI
+    setLltiLoading(true);
+    fetchLltiSnapshot(user)
+      .then((data) => {
+        setLltiMoyenne(data.moyenne_llti);
+        setLltiStatus(data.status);
+        setLltiError(null);
+      })
+      .catch((err) => setLltiError(err.message))
+      .finally(() => setLltiLoading(false));
+    */
   }, [user]);
 
   const prodBadge = useMemo(() => {
@@ -112,12 +194,30 @@ export function Dashboard({ auth, onOpenProductivity }: Props) {
           <h3 className="text-xl font-semibold text-white">Performance Caterpillar</h3>
           <p className="text-sm text-sand/80">Vue globale et KPI cliquables (données mockées).</p>
         </div>
-        <button
-          onClick={onOpenProductivity}
-          className="btn-primary bg-gold text-onyx hover:shadow-luxe"
-        >
-          Détail productivité
-        </button>
+        <div className="flex gap-3 flex-wrap">
+          <button
+            onClick={onOpenProductivity}
+            className="px-4 py-2 bg-gold text-black rounded-lg font-semibold hover:bg-gold/90 transition shadow-lg"
+          >
+            📊 Détail productivité
+          </button>
+          <button
+            onClick={() => {
+              if (onOpenSepm) {
+                onOpenSepm();
+              } else {
+                alert("Accès restreint. Votre email n'est pas dans la liste des administrateurs autorisés.");
+              }
+            }}
+            className={`px-4 py-2 rounded-lg font-semibold transition shadow-lg border-2 ${onOpenSepm
+              ? "bg-gold text-black hover:bg-gold/90 border-gold/50"
+              : "bg-gray-600 text-gray-300 hover:bg-gray-700 border-gray-500 cursor-not-allowed opacity-60"
+              }`}
+            title={onOpenSepm ? "Accéder au Suivi SEP Meeting" : "Accès restreint - Email non autorisé"}
+          >
+            📋 Suivi SEP Meeting
+          </button>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase tracking-[0.1em] text-sand/70">Granularité</span>
           <div className="flex rounded-full border border-gold/40 bg-black/40 p-1 text-sm">
@@ -125,9 +225,8 @@ export function Dashboard({ auth, onOpenProductivity }: Props) {
               <button
                 key={g}
                 onClick={() => setGranularity(g)}
-                className={`rounded-full px-3 py-1 transition ${
-                  granularity === g ? "bg-gold text-onyx" : "text-sand hover:text-white"
-                }`}
+                className={`rounded-full px-3 py-1 transition ${granularity === g ? "bg-gold text-onyx" : "text-sand hover:text-white"
+                  }`}
               >
                 {g}
               </button>
@@ -167,7 +266,7 @@ export function Dashboard({ auth, onOpenProductivity }: Props) {
         </div>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <button
           onClick={onOpenProductivity}
           className="group flex h-full flex-col gap-4 rounded-2xl border border-gold/30 bg-black/70 p-5 text-left shadow-luxe transition hover:-translate-y-1 hover:shadow-gold/20"
@@ -206,57 +305,129 @@ export function Dashboard({ auth, onOpenProductivity }: Props) {
           <div className="text-xs text-gold opacity-90 group-hover:underline">Voir le détail productivité</div>
         </button>
 
-        <div className="glass rounded-2xl p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-gold">Disponibilité</p>
-          <h3 className="mt-2 text-xl font-semibold">Backend FastAPI</h3>
-          <p className="text-sm text-sand/80">Upload in-memory, pas d'écriture disque.</p>
-        </div>
-        <div className="glass rounded-2xl p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-gold">Sécurité</p>
-          <h3 className="mt-2 text-xl font-semibold">Emails @neemba.com</h3>
-          <p className="text-sm text-sand/80">RBAC + mot de passe admin requis.</p>
-        </div>
-        <div className="glass rounded-2xl p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-gold">Palette Neemba</p>
-          <div className="mt-2 flex items-center gap-2">
-            <Sparkles className="text-gold" />
-            <span className="text-sm text-sand/90">Noir & Jaune (#FFD700), mobile-first.</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {kpis.map((kpi) => (
-          <button
-            key={kpi.id}
-            className="group flex h-full flex-col gap-3 rounded-2xl border border-gold/25 bg-black/60 p-4 text-left transition hover:-translate-y-1 hover:shadow-luxe"
-            onClick={() => {
-              // Navigation future vers /dashboard/kpi-id
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-gold">{kpi.label}</p>
-                <p className="text-2xl font-semibold text-white mt-1">{kpi.value} pts</p>
-              </div>
-              <div className="rounded-full bg-gold/15 px-3 py-1 text-xs text-gold">
-                <div className="flex items-center gap-1">
-                  <TrendingUp size={14} />
-                  {kpi.delta >= 0 ? `+${kpi.delta}` : kpi.delta}%
-                </div>
-              </div>
+        <button
+          onClick={onOpenInspection || (() => { })}
+          className="group flex h-full flex-col gap-4 rounded-2xl border border-gold/30 bg-black/70 p-5 text-left shadow-luxe transition hover:-translate-y-1 hover:shadow-gold/20"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-gold">Inspection Rate</p>
+              <h4 className="text-lg font-semibold text-white">Taux d'Inspection</h4>
+              <p className="text-sm text-sand/60 mt-1">KPI Trimestriel</p>
             </div>
-            <CategoryBar
-              values={kpi.trend.map((t) => Math.max(0, Math.min(100, t)))}
-              markerValue={kpi.value}
-              colors={["amber", "amber", "amber", "emerald"]}
-            />
-            <div className="text-xs text-sand/70">Cliquer pour voir le détail</div>
-          </button>
-        ))}
+            {(() => {
+              const badge = inspRate != null ? getInspectionRateBadge(inspRate) : null;
+              return (
+                <div className={`rounded-full px-3 py-1 text-xs ${badge ? `${badge.bgColor} ${badge.color}` : "bg-blue-500/20 text-blue-200"
+                  }`}>
+                  {inspRate != null ? (
+                    <>
+                      {inspRate.toFixed(1)}%
+                      <span className="ml-1 text-[10px]">
+                        {badge ? badge.label.split(" ")[0] : ""}
+                      </span>
+                    </>
+                  ) : (
+                    <Activity size={14} />
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+          <div className="flex items-center gap-4">
+            <ProgressCircle
+              value={inspRate ?? 0}
+              size="lg"
+              color={inspRate != null ? (inspRate >= 65 ? "emerald" : inspRate >= 50 ? "orange" : "rose") : "blue"}
+              tooltip="Taux d'inspection trimestriel (Cible CAT: 65%)"
+            >
+              <div className="text-center text-sm text-white">
+                <div className="text-2xl font-semibold">
+                  {inspRate != null ? `${inspRate.toFixed(1)}%` : "--"}
+                </div>
+                <div className="text-[11px] text-sand/70">Trimestriel</div>
+              </div>
+            </ProgressCircle>
+            <div className="space-y-2 text-sm text-sand/80">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sand/60">Variation</span>
+                <span className="font-semibold text-white">
+                  {inspDelta != null
+                    ? `${inspDelta >= 0 ? "+" : ""}${inspDelta.toFixed(1)}%`
+                    : "--"}
+                </span>
+                <span className="text-sand/60">vs mercredi dernier</span>
+              </div>
+              <div className="text-xs text-sand/60">Ratio OR inspectés / OR facturés</div>
+              {inspError && <div className="text-xs text-rose-200">Erreur: {inspError}</div>}
+              {inspLoading && <div className="text-xs text-sand/60">Chargement...</div>}
+            </div>
+          </div>
+          <div className="text-xs text-gold opacity-90 group-hover:underline">Voir le détail inspection</div>
+        </button>
+
+        <button
+          onClick={onOpenLlti || (() => { })}
+          className="group flex h-full flex-col gap-4 rounded-2xl border border-gold/30 bg-black/70 p-5 text-left shadow-luxe transition hover:-translate-y-1 hover:shadow-gold/20"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-gold">LLTI</p>
+              <h4 className="text-lg font-semibold text-white">Lead Time to Invoice</h4>
+              <p className="text-sm text-sand/60 mt-1">KPI Trimestriel</p>
+            </div>
+            {(() => {
+              const badge = lltiMoyenne != null ? getLltiBadge(lltiMoyenne) : null;
+              return (
+                <div className={`rounded-full px-3 py-1 text-xs ${badge ? `${badge.bgColor} ${badge.color}` : "bg-blue-500/20 text-blue-200"
+                  }`}>
+                  {lltiMoyenne != null ? (
+                    <>
+                      {lltiMoyenne.toFixed(1)}j
+                      <span className="ml-1 text-[10px]">
+                        {lltiStatus || ""}
+                      </span>
+                    </>
+                  ) : (
+                    <Activity size={14} />
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+          <div className="flex items-center gap-4">
+            <ProgressCircle
+              value={lltiMoyenne != null ? Math.min(lltiMoyenne * 5, 100) : 0}
+              size="lg"
+              color={lltiMoyenne != null ? (lltiMoyenne < 7 ? "emerald" : lltiMoyenne < 17 ? "yellow" : lltiMoyenne <= 21 ? "orange" : "rose") : "blue"}
+              tooltip="LLTI moyen en jours (Cible: <7 Excellent, <17 Advanced, <=21 Emerging)"
+            >
+              <div className="text-center text-sm text-white">
+                <div className="text-2xl font-semibold">
+                  {lltiMoyenne != null ? `${lltiMoyenne.toFixed(1)}j` : "--"}
+                </div>
+                <div className="text-[11px] text-sand/70">Trimestriel</div>
+              </div>
+            </ProgressCircle>
+            <div className="space-y-2 text-sm text-sand/80">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sand/60">Statut</span>
+                <span className="font-semibold text-white">
+                  {lltiStatus || "--"}
+                </span>
+              </div>
+              <div className="text-xs text-sand/60">Moyenne jours entre pointage et facture</div>
+              <div className="text-xs text-sand/60">Seuils: &lt;7 Excellent, &lt;17 Advanced, ≤21 Emerging</div>
+              {lltiError && <div className="text-xs text-rose-200">Erreur: {lltiError}</div>}
+              {lltiLoading && <div className="text-xs text-sand/60">Chargement...</div>}
+            </div>
+          </div>
+          <div className="text-xs text-gold opacity-90 group-hover:underline">Voir le détail LLTI</div>
+        </button>
       </div>
 
       <UploadArea user={user} isAdmin={isAdmin} />
+      <AgentInsightsPanel isAdmin={isAdmin} data={mockData} loading={mockLoading} />
     </div>
   );
 }
