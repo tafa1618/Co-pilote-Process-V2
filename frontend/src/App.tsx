@@ -9,6 +9,8 @@ import ProductivityDetail from "./pages/ProductivityDetail";
 import SuiviSepMeeting from "./pages/SuiviSepMeeting";
 import InspectionDetail from "./pages/InspectionDetail";
 import LltiDetail from "./pages/LltiDetail";
+import AdminView from "./pages/AdminView";
+import MeetingSEP from "./pages/MeetingSEP";
 
 // ⚠️ IMPORTANT : Liste des emails autorisés pour accéder à SuiviSepMeeting et Admin
 // Seul admin-sep@neemba.com dispose des droits administrateur complets
@@ -19,7 +21,7 @@ const ALLOWED_ADMINS = [
 
 function App() {
   const auth = useAuth();
-  const [view, setView] = useState<"dashboard" | "test" | "sep" | "productivity" | "sepm" | "inspection" | "llti">("sep");
+  const [view, setView] = useState<"dashboard" | "test" | "sep" | "productivity" | "sepm" | "inspection" | "llti" | "admin" | "meeting">("sep");
 
   console.log("🔍 App rendering - auth.user:", auth.user);
 
@@ -68,12 +70,23 @@ function App() {
                       📊 Dashboard SEP
                     </button>
 
+                    {/* Meeting SEP button - only visible for admin users */}
+                    {canAccessSepm && (
+                      <button
+                        onClick={() => setView("meeting")}
+                        className="px-4 py-2 rounded-lg bg-green-600/20 hover:bg-green-600/30 text-green-300 font-semibold transition-all border border-green-600/30"
+                        title="Réunion SEP du Mercredi"
+                      >
+                        📅 Meeting SEP
+                      </button>
+                    )}
+
                     {/* Admin button - only visible for admin users */}
                     {canAccessSepm && (
                       <button
-                        onClick={() => setView("sepm")}
+                        onClick={() => setView("admin")}
                         className="px-4 py-2 rounded-lg font-semibold transition-all border bg-cat-yellow text-onyx hover:bg-cat-yellow/90 border-cat-yellow"
-                        title="Suivi SEP Meeting"
+                        title="Administration"
                       >
                         📋 Admin
                       </button>
@@ -118,6 +131,10 @@ function App() {
             <InspectionDetail auth={auth} onBack={() => setView("sep")} />
           ) : view === "llti" ? (
             <LltiDetail auth={auth} onBack={() => setView("sep")} />
+          ) : view === "admin" ? (
+            <AdminView auth={auth} onBack={() => setView("sep")} />
+          ) : view === "meeting" ? (
+            <MeetingSEP auth={auth} onBack={() => setView("sep")} />
           ) : null
         ) : (
           <Login onLogin={auth.login} error={auth.error} />
