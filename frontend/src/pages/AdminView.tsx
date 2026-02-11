@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Upload, FileText, Trash2, Settings, Power, AlertCircle } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Trash2, Settings, Power, AlertCircle, Save } from "lucide-react";
 import type { AuthState } from "../types";
 
 interface UploadedFile {
@@ -61,11 +61,61 @@ const MOCK_AGENTS: AgentConfig[] = [
     },
 ];
 
+interface KpiData {
+    week: string;
+    tech_productivity: number;
+    tech_capacity: number;
+    inspection_rate: number;
+    llti: number;
+    data_quality: number;
+    service_response: number;
+}
+
+interface KpiFocusConfig {
+    tech_productivity: boolean;
+    tech_capacity: boolean;
+    inspection_rate: boolean;
+    llti: boolean;
+    data_quality: boolean;
+    service_response: boolean;
+}
+
+const KPI_LABELS = {
+    tech_productivity: "Tech Productivity",
+    tech_capacity: "Tech Capacity",
+    inspection_rate: "Inspection Rate",
+    llti: "LLTI",
+    data_quality: "Data Quality",
+    service_response: "Service Response",
+};
+
 export function AdminView({ auth, onBack }: { auth: AuthState; onBack: () => void }) {
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [isDragging, setIsDragging] = useState(false);
     const [agents, setAgents] = useState<AgentConfig[]>(MOCK_AGENTS);
     const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+
+    // KPI Manual Entry State
+    const [kpiData, setKpiData] = useState<KpiData>({
+        week: new Date().toISOString().split('T')[0],
+        tech_productivity: 0,
+        tech_capacity: 0,
+        inspection_rate: 0,
+        llti: 0,
+        data_quality: 0,
+        service_response: 0,
+    });
+    const [savedKpis, setSavedKpis] = useState<KpiData[]>([]);
+
+    // KPI Focus Selection State
+    const [kpiFocus, setKpiFocus] = useState<KpiFocusConfig>({
+        tech_productivity: true,
+        tech_capacity: true,
+        inspection_rate: true,
+        llti: true,
+        data_quality: true,
+        service_response: true,
+    });
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -136,6 +186,55 @@ export function AdminView({ auth, onBack }: { auth: AuthState; onBack: () => voi
         return (bytes / (1024 * 1024)).toFixed(1) + " MB";
     };
 
+    const handleSaveKpi = () => {
+        if (!kpiData.week) {
+            alert("Veuillez sélectionner une semaine");
+            return;
+        }
+
+        // Check if KPI for this week already exists
+        const existingIndex = savedKpis.findIndex(k => k.week === kpiData.week);
+
+        if (existingIndex >= 0) {
+            // Update existing
+            const updated = [...savedKpis];
+            updated[existingIndex] = { ...kpiData };
+            setSavedKpis(updated);
+            alert("KPIs mis à jour avec succès !");
+        } else {
+            // Add new
+            setSavedKpis([...savedKpis, { ...kpiData }]);
+            alert("KPIs enregistrés avec succès !");
+        }
+
+        // Reset form
+        setKpiData({
+            week: new Date().toISOString().split('T')[0],
+            tech_productivity: 0,
+            tech_capacity: 0,
+            inspection_rate: 0,
+            llti: 0,
+            data_quality: 0,
+            service_response: 0,
+        });
+    };
+
+    const handleDeleteKpi = (week: string) => {
+        if (confirm(`Supprimer les KPIs de la semaine du ${new Date(week).toLocaleDateString('fr-FR')} ?`)) {
+            setSavedKpis(savedKpis.filter(k => k.week !== week));
+        }
+    };
+
+    const handleToggleKpiFocus = (kpiKey: keyof KpiFocusConfig) => {
+        setKpiFocus({ ...kpiFocus, [kpiKey]: !kpiFocus[kpiKey] });
+    };
+
+    const handleSaveKpiFocus = () => {
+        // TODO: Save to backend
+        const selectedCount = Object.values(kpiFocus).filter(v => v).length;
+        alert(`Configuration sauvegardée ! ${selectedCount} KPI(s) sélectionné(s) pour les réunions.`);
+    };
+
     const selectedAgentData = agents.find((a) => a.id === selectedAgent);
 
     return (
@@ -180,8 +279,8 @@ export function AdminView({ auth, onBack }: { auth: AuthState; onBack: () => voi
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${isDragging
-                            ? "border-cat-yellow bg-cat-yellow/10"
-                            : "border-white/20 hover:border-cat-yellow/50"
+                        ? "border-cat-yellow bg-cat-yellow/10"
+                        : "border-white/20 hover:border-cat-yellow/50"
                         }`}
                 >
                     <Upload className="mx-auto mb-4 text-cat-yellow" size={48} />
@@ -240,6 +339,243 @@ export function AdminView({ auth, onBack }: { auth: AuthState; onBack: () => voi
                 )}
             </div>
 
+            {/* KPI Manual Entry Section */}
+            <div className="bg-black/60 border-2 border-cat-yellow/30 rounded-xl p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="h-10 w-10 bg-cat-yellow/20 rounded-lg flex items-center justify-center">
+                        <FileText className="text-cat-yellow" size={20} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-white">Saisie Manuelle des KPIs</h3>
+                        <p className="text-xs text-sand/60">
+                            Renseignez les KPIs hebdomadaires manuellement
+                        </p>
+                    </div>
+                </div>
+
+                {/* KPI Entry Form */}
+                <div className="bg-onyx/60 border border-cat-yellow/10 rounded-lg p-6 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                        {/* Week Selection */}
+                        <div className="lg:col-span-3">
+                            <label className="text-sm font-semibold text-sand mb-2 block">
+                                Semaine
+                            </label>
+                            <input
+                                type="date"
+                                value={kpiData.week}
+                                onChange={(e) => setKpiData({ ...kpiData, week: e.target.value })}
+                                className="w-full bg-black/60 border border-white/20 rounded-lg px-4 py-2 text-white focus:border-cat-yellow focus:outline-none"
+                            />
+                        </div>
+
+                        {/* Tech Productivity */}
+                        <div>
+                            <label className="text-sm font-semibold text-sand mb-2 block">
+                                Tech Productivity (%)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={kpiData.tech_productivity}
+                                onChange={(e) => setKpiData({ ...kpiData, tech_productivity: parseFloat(e.target.value) || 0 })}
+                                className="w-full bg-black/60 border border-white/20 rounded-lg px-4 py-2 text-white focus:border-cat-yellow focus:outline-none"
+                                placeholder="Ex: 82.5"
+                            />
+                        </div>
+
+                        {/* Tech Capacity */}
+                        <div>
+                            <label className="text-sm font-semibold text-sand mb-2 block">
+                                Tech Capacity (h)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={kpiData.tech_capacity}
+                                onChange={(e) => setKpiData({ ...kpiData, tech_capacity: parseFloat(e.target.value) || 0 })}
+                                className="w-full bg-black/60 border border-white/20 rounded-lg px-4 py-2 text-white focus:border-cat-yellow focus:outline-none"
+                                placeholder="Ex: 1250"
+                            />
+                        </div>
+
+                        {/* Inspection Rate */}
+                        <div>
+                            <label className="text-sm font-semibold text-sand mb-2 block">
+                                Inspection Rate (%)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={kpiData.inspection_rate}
+                                onChange={(e) => setKpiData({ ...kpiData, inspection_rate: parseFloat(e.target.value) || 0 })}
+                                className="w-full bg-black/60 border border-white/20 rounded-lg px-4 py-2 text-white focus:border-cat-yellow focus:outline-none"
+                                placeholder="Ex: 65.2"
+                            />
+                        </div>
+
+                        {/* LLTI */}
+                        <div>
+                            <label className="text-sm font-semibold text-sand mb-2 block">
+                                LLTI (jours)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={kpiData.llti}
+                                onChange={(e) => setKpiData({ ...kpiData, llti: parseFloat(e.target.value) || 0 })}
+                                className="w-full bg-black/60 border border-white/20 rounded-lg px-4 py-2 text-white focus:border-cat-yellow focus:outline-none"
+                                placeholder="Ex: 8.5"
+                            />
+                        </div>
+
+                        {/* Data Quality */}
+                        <div>
+                            <label className="text-sm font-semibold text-sand mb-2 block">
+                                Data Quality (%)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={kpiData.data_quality}
+                                onChange={(e) => setKpiData({ ...kpiData, data_quality: parseFloat(e.target.value) || 0 })}
+                                className="w-full bg-black/60 border border-white/20 rounded-lg px-4 py-2 text-white focus:border-cat-yellow focus:outline-none"
+                                placeholder="Ex: 94.8"
+                            />
+                        </div>
+
+                        {/* Service Response */}
+                        <div>
+                            <label className="text-sm font-semibold text-sand mb-2 block">
+                                Service Response (h)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={kpiData.service_response}
+                                onChange={(e) => setKpiData({ ...kpiData, service_response: parseFloat(e.target.value) || 0 })}
+                                className="w-full bg-black/60 border border-white/20 rounded-lg px-4 py-2 text-white focus:border-cat-yellow focus:outline-none"
+                                placeholder="Ex: 1.2"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button
+                            onClick={handleSaveKpi}
+                            className="px-6 py-3 bg-cat-yellow text-onyx font-bold rounded-lg hover:bg-cat-yellow/90 transition-all flex items-center gap-2"
+                        >
+                            <Save size={18} />
+                            Enregistrer les KPIs
+                        </button>
+                    </div>
+                </div>
+
+                {/* Saved KPIs List */}
+                {savedKpis.length > 0 && (
+                    <div>
+                        <h4 className="text-sm font-semibold text-white mb-3">
+                            KPIs enregistrés ({savedKpis.length})
+                        </h4>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-white/10">
+                                        <th className="text-left text-cat-yellow text-xs font-semibold p-3">Semaine</th>
+                                        <th className="text-left text-cat-yellow text-xs font-semibold p-3">Tech Productivity (%)</th>
+                                        <th className="text-left text-cat-yellow text-xs font-semibold p-3">Tech Capacity (h)</th>
+                                        <th className="text-left text-cat-yellow text-xs font-semibold p-3">Inspection Rate (%)</th>
+                                        <th className="text-left text-cat-yellow text-xs font-semibold p-3">LLTI (j)</th>
+                                        <th className="text-left text-cat-yellow text-xs font-semibold p-3">Data Quality (%)</th>
+                                        <th className="text-left text-cat-yellow text-xs font-semibold p-3">Service Response (h)</th>
+                                        <th className="text-left text-cat-yellow text-xs font-semibold p-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {savedKpis.map((kpi) => (
+                                        <tr key={kpi.week} className="border-b border-white/5 hover:bg-white/5">
+                                            <td className="text-white text-sm p-3">
+                                                {new Date(kpi.week).toLocaleDateString('fr-FR')}
+                                            </td>
+                                            <td className="text-white text-sm p-3">{kpi.tech_productivity.toFixed(1)}</td>
+                                            <td className="text-white text-sm p-3">{kpi.tech_capacity.toFixed(0)}</td>
+                                            <td className="text-white text-sm p-3">{kpi.inspection_rate.toFixed(1)}</td>
+                                            <td className="text-white text-sm p-3">{kpi.llti.toFixed(1)}</td>
+                                            <td className="text-white text-sm p-3">{kpi.data_quality.toFixed(1)}</td>
+                                            <td className="text-white text-sm p-3">{kpi.service_response.toFixed(1)}</td>
+                                            <td className="p-3">
+                                                <button
+                                                    onClick={() => handleDeleteKpi(kpi.week)}
+                                                    className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-all"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* KPI Focus Selection for Meetings */}
+            <div className="bg-black/60 border-2 border-cat-yellow/30 rounded-xl p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="h-10 w-10 bg-cat-yellow/20 rounded-lg flex items-center justify-center">
+                        <Settings className="text-cat-yellow" size={20} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-white">KPIs à Afficher en Réunion</h3>
+                        <p className="text-xs text-sand/60">
+                            Sélectionnez les KPIs pertinents pour les réunions SEP
+                        </p>
+                    </div>
+                </div>
+
+                <div className="bg-onyx/60 border border-cat-yellow/10 rounded-lg p-6">
+                    <p className="text-sm text-sand/80 mb-4">
+                        Cochez les KPIs que vous souhaitez afficher dans la vue "Meeting SEP" :
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        {(Object.keys(kpiFocus) as Array<keyof KpiFocusConfig>).map((kpiKey) => (
+                            <label
+                                key={kpiKey}
+                                className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${kpiFocus[kpiKey]
+                                        ? "border-cat-yellow bg-cat-yellow/10"
+                                        : "border-white/10 bg-onyx/40 hover:border-white/30"
+                                    }`}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={kpiFocus[kpiKey]}
+                                    onChange={() => handleToggleKpiFocus(kpiKey)}
+                                    className="w-5 h-5 accent-cat-yellow cursor-pointer"
+                                />
+                                <span className={`font-medium ${kpiFocus[kpiKey] ? "text-white" : "text-sand/70"}`}>
+                                    {KPI_LABELS[kpiKey]}
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                        <p className="text-sm text-sand/60">
+                            {Object.values(kpiFocus).filter(v => v).length} / {Object.keys(kpiFocus).length} KPIs sélectionnés
+                        </p>
+                        <button
+                            onClick={handleSaveKpiFocus}
+                            className="px-6 py-3 bg-cat-yellow text-onyx font-bold rounded-lg hover:bg-cat-yellow/90 transition-all flex items-center gap-2"
+                        >
+                            <Save size={18} />
+                            Sauvegarder la sélection
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* Agent Configuration Section */}
             <div className="bg-black/60 border-2 border-cat-yellow/30 rounded-xl p-6 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-6">
@@ -261,8 +597,8 @@ export function AdminView({ auth, onBack }: { auth: AuthState; onBack: () => voi
                             key={agent.id}
                             onClick={() => setSelectedAgent(agent.id)}
                             className={`bg-onyx/60 border-2 rounded-lg p-4 cursor-pointer transition-all ${selectedAgent === agent.id
-                                    ? "border-cat-yellow"
-                                    : "border-white/10 hover:border-cat-yellow/50"
+                                ? "border-cat-yellow"
+                                : "border-white/10 hover:border-cat-yellow/50"
                                 }`}
                         >
                             <div className="flex items-start justify-between mb-3">
@@ -279,8 +615,8 @@ export function AdminView({ auth, onBack }: { auth: AuthState; onBack: () => voi
                                         toggleAgent(agent.id);
                                     }}
                                     className={`p-1.5 rounded-lg transition-all ${agent.enabled
-                                            ? "bg-green-500/20 text-green-300"
-                                            : "bg-gray-500/20 text-gray-400"
+                                        ? "bg-green-500/20 text-green-300"
+                                        : "bg-gray-500/20 text-gray-400"
                                         }`}
                                     title={agent.enabled ? "Désactiver" : "Activer"}
                                 >
@@ -292,8 +628,8 @@ export function AdminView({ auth, onBack }: { auth: AuthState; onBack: () => voi
                                 <span className="text-sand/60">Fréquence: {agent.frequency}</span>
                                 <span
                                     className={`px-2 py-1 rounded ${agent.enabled
-                                            ? "bg-green-500/20 text-green-300"
-                                            : "bg-gray-500/20 text-gray-400"
+                                        ? "bg-green-500/20 text-green-300"
+                                        : "bg-gray-500/20 text-gray-400"
                                         }`}
                                 >
                                     {agent.enabled ? "Actif" : "Inactif"}

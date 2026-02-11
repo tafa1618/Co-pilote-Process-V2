@@ -279,6 +279,144 @@ export function MeetingSEP({ auth, onBack }: { auth: AuthState; onBack: () => vo
             {/* KPI Snapshot */}
             <KpiSnapshot user={auth.user} />
 
+            {/* KPI Weekly Comparison */}
+            <div className="bg-black/60 border-2 border-cat-yellow/30 rounded-xl p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="h-10 w-10 bg-cat-yellow/20 rounded-lg flex items-center justify-center">
+                        <FileText className="text-cat-yellow" size={20} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-white">Évolution Hebdomadaire des KPIs</h3>
+                        <p className="text-xs text-sand/60">
+                            Comparaison semaine actuelle vs semaine précédente
+                        </p>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b border-white/10">
+                                <th className="text-left text-cat-yellow text-sm font-semibold p-3">KPI</th>
+                                <th className="text-center text-cat-yellow text-sm font-semibold p-3">Semaine N-1</th>
+                                <th className="text-center text-cat-yellow text-sm font-semibold p-3">Semaine N</th>
+                                <th className="text-center text-cat-yellow text-sm font-semibold p-3">Variation</th>
+                                <th className="text-center text-cat-yellow text-sm font-semibold p-3">Tendance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {/* Tech Productivity */}
+                            <tr className="border-b border-white/5 hover:bg-white/5">
+                                <td className="text-white font-medium p-3">Tech Productivity</td>
+                                <td className="text-center text-white p-3">80.2%</td>
+                                <td className="text-center text-white p-3">82.5%</td>
+                                <td className="text-center p-3">
+                                    <span className="px-2 py-1 rounded bg-green-500/20 text-green-300 text-sm font-semibold">
+                                        +2.3%
+                                    </span>
+                                </td>
+                                <td className="text-center p-3">
+                                    <span className="text-green-400 text-xl">↑</span>
+                                </td>
+                            </tr>
+
+                            {/* Tech Capacity */}
+                            <tr className="border-b border-white/5 hover:bg-white/5">
+                                <td className="text-white font-medium p-3">Tech Capacity</td>
+                                <td className="text-center text-white p-3">1200h</td>
+                                <td className="text-center text-white p-3">1250h</td>
+                                <td className="text-center p-3">
+                                    <span className="px-2 py-1 rounded bg-green-500/20 text-green-300 text-sm font-semibold">
+                                        +4.2%
+                                    </span>
+                                </td>
+                                <td className="text-center p-3">
+                                    <span className="text-green-400 text-xl">↑</span>
+                                </td>
+                            </tr>
+
+                            {/* Inspection Rate */}
+                            <tr className="border-b border-white/5 hover:bg-white/5">
+                                <td className="text-white font-medium p-3">Inspection Rate</td>
+                                <td className="text-center text-white p-3">68.5%</td>
+                                <td className="text-center text-white p-3">65.2%</td>
+                                <td className="text-center p-3">
+                                    <span className="px-2 py-1 rounded bg-red-500/20 text-red-300 text-sm font-semibold">
+                                        -3.3%
+                                    </span>
+                                </td>
+                                <td className="text-center p-3">
+                                    <span className="text-red-400 text-xl">↓</span>
+                                </td>
+                            </tr>
+
+                            {/* LLTI */}
+                            <tr className="border-b border-white/5 hover:bg-white/5">
+                                <td className="text-white font-medium p-3">LLTI</td>
+                                <td className="text-center text-white p-3">9.2j</td>
+                                <td className="text-center text-white p-3">8.5j</td>
+                                <td className="text-center p-3">
+                                    <span className="px-2 py-1 rounded bg-green-500/20 text-green-300 text-sm font-semibold">
+                                        -7.6%
+                                    </span>
+                                </td>
+                                <td className="text-center p-3">
+                                    <span className="text-green-400 text-xl">↓</span>
+                                </td>
+                            </tr>
+
+                            {/* Data Quality */}
+                            <tr className="border-b border-white/5 hover:bg-white/5">
+                                <td className="text-white font-medium p-3">Data Quality</td>
+                                <td className="text-center text-white p-3">93.1%</td>
+                                <td className="text-center text-white p-3">94.8%</td>
+                                <td className="text-center p-3">
+                                    <span className="px-2 py-1 rounded bg-green-500/20 text-green-300 text-sm font-semibold">
+                                        +1.7%
+                                    </span>
+                                </td>
+                                <td className="text-center p-3">
+                                    <span className="text-green-400 text-xl">↑</span>
+                                </td>
+                            </tr>
+
+                            {/* Service Response */}
+                            <tr className="border-b border-white/5 hover:bg-white/5">
+                                <td className="text-white font-medium p-3">Service Response</td>
+                                <td className="text-center text-white p-3">1.5h</td>
+                                <td className="text-center text-white p-3">1.2h</td>
+                                <td className="text-center p-3">
+                                    <span className="px-2 py-1 rounded bg-green-500/20 text-green-300 text-sm font-semibold">
+                                        -20.0%
+                                    </span>
+                                </td>
+                                <td className="text-center p-3">
+                                    <span className="text-green-400 text-xl">↓</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Summary */}
+                <div className="mt-4 p-4 bg-onyx/60 border border-cat-yellow/10 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p className="text-sand/60 text-xs mb-1">KPIs en amélioration</p>
+                            <p className="text-2xl font-bold text-green-400">5</p>
+                        </div>
+                        <div>
+                            <p className="text-sand/60 text-xs mb-1">KPIs en dégradation</p>
+                            <p className="text-2xl font-bold text-red-400">1</p>
+                        </div>
+                        <div>
+                            <p className="text-sand/60 text-xs mb-1">KPIs stables</p>
+                            <p className="text-2xl font-bold text-gray-400">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Participants Section */}
             <div className="bg-black/60 border-2 border-cat-yellow/30 rounded-xl p-6 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-4">
@@ -414,8 +552,8 @@ export function MeetingSEP({ auth, onBack }: { auth: AuthState; onBack: () => vo
                                     <td className="p-3">
                                         <span
                                             className={`px-2 py-1 rounded text-xs font-semibold ${action.statut === "Clôturé"
-                                                    ? "bg-green-500/20 text-green-300"
-                                                    : "bg-amber-500/20 text-amber-300"
+                                                ? "bg-green-500/20 text-green-300"
+                                                : "bg-amber-500/20 text-amber-300"
                                                 }`}
                                         >
                                             {action.statut}
@@ -487,8 +625,8 @@ export function MeetingSEP({ auth, onBack }: { auth: AuthState; onBack: () => vo
                             <button
                                 onClick={handleCopyMarkdown}
                                 className={`px-3 py-1.5 rounded-lg font-semibold text-sm flex items-center gap-2 transition-all ${copied
-                                        ? "bg-green-600 text-white"
-                                        : "bg-cat-yellow/20 text-cat-yellow hover:bg-cat-yellow/30"
+                                    ? "bg-green-600 text-white"
+                                    : "bg-cat-yellow/20 text-cat-yellow hover:bg-cat-yellow/30"
                                     }`}
                             >
                                 {copied ? <Check size={14} /> : <Copy size={14} />}

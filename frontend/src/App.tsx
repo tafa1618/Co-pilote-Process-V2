@@ -11,6 +11,7 @@ import InspectionDetail from "./pages/InspectionDetail";
 import LltiDetail from "./pages/LltiDetail";
 import AdminView from "./pages/AdminView";
 import MeetingSEP from "./pages/MeetingSEP";
+import ManagerView from "./pages/ManagerView";
 
 // ⚠️ IMPORTANT : Liste des emails autorisés pour accéder à SuiviSepMeeting et Admin
 // Seul admin-sep@neemba.com dispose des droits administrateur complets
@@ -21,7 +22,7 @@ const ALLOWED_ADMINS = [
 
 function App() {
   const auth = useAuth();
-  const [view, setView] = useState<"dashboard" | "test" | "sep" | "productivity" | "sepm" | "inspection" | "llti" | "admin" | "meeting">("sep");
+  const [view, setView] = useState<"dashboard" | "test" | "sep" | "productivity" | "sepm" | "inspection" | "llti" | "admin" | "meeting" | "manager">("sep");
 
   console.log("🔍 App rendering - auth.user:", auth.user);
 
@@ -81,6 +82,17 @@ function App() {
                       </button>
                     )}
 
+                    {/* Manager Button */}
+                    {canAccessSepm && (
+                      <button
+                        onClick={() => setView("manager")}
+                        className="px-4 py-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 font-semibold transition-all border border-blue-600/30"
+                        title="Espace Manager & Simulateur"
+                      >
+                        🎯 Manager
+                      </button>
+                    )}
+
                     {/* Admin button - only visible for admin users */}
                     {canAccessSepm && (
                       <button
@@ -135,6 +147,8 @@ function App() {
             <AdminView auth={auth} onBack={() => setView("sep")} />
           ) : view === "meeting" ? (
             <MeetingSEP auth={auth} onBack={() => setView("sep")} />
+          ) : view === "manager" ? (
+            <ManagerView auth={auth} onBack={() => setView("sep")} />
           ) : null
         ) : (
           <Login onLogin={auth.login} error={auth.error} />
