@@ -5,7 +5,7 @@ from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 import pandas as pd
 from config import ADMIN_PASSWORD, ADMIN_EMAIL
 from database import get_conn, ensure_schema, POINTAGE_SCHEMA, INSPECTION_RECORD_SCHEMA
-from services.productivity_service import process_uploaded_file, set_latest_df
+from services.productivity_service_legacy import process_uploaded_file, set_latest_df
 from preprocessing.preprocessing_inspection import preprocess_uploaded_inspection_file
 from services.llti_service import process_uploaded_file as process_llti_file, set_latest_df as set_llti_df
 

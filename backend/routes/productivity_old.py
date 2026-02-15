@@ -1,6 +1,6 @@
 """Routes pour la productivité"""
 from fastapi import APIRouter, HTTPException, Request
-from services.productivity_service import (
+from services.productivity_service_legacy import (
     load_from_db,
     get_latest_df,
     set_latest_df,
