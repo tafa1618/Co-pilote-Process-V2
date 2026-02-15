@@ -210,3 +210,8 @@ __marimo__/
 SEP/
 node_modules/
 *.tsbuildinfo
+
+# Sensitive data - Employee timesheets
+data/
+*.xlsx
+*.xls

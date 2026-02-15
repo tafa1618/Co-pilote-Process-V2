@@ -38,8 +38,8 @@ def health():
     return jsonify({"status": "ok"})
 
 if __name__ == '__main__':
-    print("🚀 SEP Mock Server starting on http://localhost:8000")
-    print("📊 Endpoints:")
+    print("SEP Mock Server starting on http://localhost:8000")
+    print("Endpoints:")
     print("   - GET /api/sep/kpis")
     print("   - GET /api/sep/custom-kpis")
     print("   - GET /api/sep/insights")
