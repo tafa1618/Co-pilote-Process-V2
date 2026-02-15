@@ -3,7 +3,8 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from config import ADMIN_EMAIL, ADMIN_PASSWORD, EXEMPT_PATHS, ALLOWED_ADMINS
 from database import ensure_schema
-from routes import productivity_old, inspection, upload, lean_actions, meeting_summary, llti, productivity_kpi
+from routes import inspection, upload, lean_actions, meeting_summary, llti, productivity_kpi
+# from routes import productivity_old  # Disabled - legacy routes with incompatible imports
 
 # ==================================================
 # APP
@@ -63,7 +64,7 @@ async def health():
 # ==================================================
 # ROUTES
 # ==================================================
-app.include_router(productivity_old.router)  # Old productivity routes (legacy)
+# app.include_router(productivity_old.router)  # Disabled - legacy routes
 app.include_router(productivity_kpi.router)  # New Productivity KPI endpoints
 app.include_router(inspection.router)
 app.include_router(llti.router)
