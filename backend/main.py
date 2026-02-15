@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from config import ADMIN_EMAIL, ADMIN_PASSWORD, EXEMPT_PATHS, ALLOWED_ADMINS
 from database import ensure_schema
-from routes import productivity, inspection, upload, lean_actions, meeting_summary, llti
+from routes import productivity, inspection, upload, lean_actions, meeting_summary, llti, productivity_kpi
 
 # ==================================================
 # APP
@@ -64,6 +64,7 @@ async def health():
 # ROUTES
 # ==================================================
 app.include_router(productivity.router)
+app.include_router(productivity_kpi.router)  # Productivity KPI endpoints
 app.include_router(inspection.router)
 app.include_router(llti.router)
 app.include_router(upload.router)
