@@ -1,10 +1,18 @@
 """Configuration et constantes de l'application"""
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 ADMIN_EMAIL = (os.environ.get("ADMIN_EMAIL") or "").strip().lower()
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD") or ""
 ENV = os.environ.get("ENV", "dev")
-DATABASE_URL = os.environ.get("DATABASE_URL") or "postgresql://kpi_user:kpi_pass@db:5432/kpi_db"
+
+# Default to localhost for local development (use 'db' in docker-compose)
+DATABASE_URL = os.environ.get("DATABASE_URL") or "postgresql://postgres:postgres@localhost:5432/kpi_db"
+
+print(f"🔍 [DEBUG] DATABASE_URL: {DATABASE_URL}")  # Temporary debug
 
 EXEMPT_PATHS = {
     "/health",
