@@ -2,7 +2,7 @@
 from datetime import datetime, date
 from typing import Any, Dict, List
 import pandas as pd
-from services.productivity_service import load_from_db, get_latest_df
+from services.productivity_service_legacy import load_from_db, get_latest_df
 from services.inspection_service import calculate_inspection_analytics
 from utils.quarters import get_current_quarter_dates
 from database import get_conn
