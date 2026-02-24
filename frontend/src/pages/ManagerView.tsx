@@ -1,7 +1,6 @@
 import { ArrowLeft, User, LayoutDashboard, Calculator } from "lucide-react";
 import { AuthState } from "../types";
-import { SepSimulator } from "../components/sep/SepSimulator";
-import { ManagerChatAgent } from "../components/sep/ManagerChatAgent";
+import { SepSimulator, ManagerChatAgent } from "../components/sep";
 import { useState } from "react";
 
 export function ManagerView({ auth, onBack }: { auth: AuthState; onBack: () => void }) {

@@ -57,11 +57,11 @@ function ActionRow({
       <TableCell className="text-white">{action.id}</TableCell>
       <TableCell className="text-white">
         {isEditing ? (
-          <TextInput
+          <input
             type="date"
             value={editState.date_ouverture || ""}
             onChange={(e) => setEditState({ ...editState, date_ouverture: e.target.value })}
-            className="w-32 bg-black/60 border-gold/20 text-white text-xs"
+            className="w-32 bg-black/60 border border-white/20 rounded-md px-2 py-1 text-white text-xs focus:ring-1 focus:ring-cat-yellow outline-none"
           />
         ) : (
           action.date_ouverture
@@ -69,11 +69,11 @@ function ActionRow({
       </TableCell>
       <TableCell className="text-white">
         {isEditing ? (
-          <TextInput
+          <input
             type="date"
             value={editState.date_cloture_prevue || ""}
             onChange={(e) => setEditState({ ...editState, date_cloture_prevue: e.target.value || null })}
-            className="w-32 bg-black/60 border-gold/20 text-white text-xs"
+            className="w-32 bg-black/60 border border-white/20 rounded-md px-2 py-1 text-white text-xs focus:ring-1 focus:ring-cat-yellow outline-none"
           />
         ) : (
           action.date_cloture_prevue || "-"
@@ -545,18 +545,17 @@ export function SuiviSepMeeting({
               onChange={(e) => setNewAction({ ...newAction, probleme: e.target.value })}
               className="bg-black/60 border-gold/20 text-white"
             />
-            <TextInput
+            <input
               type="date"
               value={newAction.date_ouverture || ""}
               onChange={(e) => setNewAction({ ...newAction, date_ouverture: e.target.value })}
-              className="bg-black/60 border-gold/20 text-white"
+              className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cat-yellow outline-none"
             />
-            <TextInput
+            <input
               type="date"
-              placeholder="Date clôture prévue"
               value={newAction.date_cloture_prevue || ""}
               onChange={(e) => setNewAction({ ...newAction, date_cloture_prevue: e.target.value || null })}
-              className="bg-black/60 border-gold/20 text-white"
+              className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cat-yellow outline-none"
             />
             <TextInput
               placeholder="Owner (email) *"
