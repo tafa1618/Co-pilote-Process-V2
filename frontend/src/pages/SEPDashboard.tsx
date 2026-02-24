@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import KPICard from '../components/KPICard';
 import KPIDetailModal from '../components/KPIDetailModal';
 import { Bot, Building } from 'lucide-react';
+import { BACKEND_URL } from '../config/constants';
 
 interface SEPDashboardProps {
     user: any;
@@ -17,8 +18,8 @@ const SEPDashboard: React.FC<SEPDashboardProps> = ({ user, isAdmin }) => {
     useEffect(() => {
         // Fetch SEP KPIs
         Promise.all([
-            fetch('http://localhost:8000/api/sep/kpis').then(res => res.json()),
-            fetch('http://localhost:8000/api/sep/insights').then(res => res.json())
+            fetch(`${BACKEND_URL}/api/sep/kpis`).then(res => res.json()),
+            fetch(`${BACKEND_URL}/api/sep/insights`).then(res => res.json())
         ])
             .then(([kpisData, insightsData]) => {
                 setSepData(kpisData);

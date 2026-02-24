@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, TrendingUp, AlertCircle, CheckCircle, Lightbulb, Target, Calendar } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { BACKEND_URL } from '../config/constants';
 
 interface KPIDetailModalProps {
     kpiName: string;
@@ -39,7 +40,7 @@ function KPIDetailModal({ kpiName, onClose }: KPIDetailModalProps) {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:8000/api/sep/kpi/${encodeURIComponent(kpiName)}/details`);
+                const response = await fetch(`${BACKEND_URL}/api/sep/kpi/${encodeURIComponent(kpiName)}/details`);
                 const data = await response.json();
                 setDetail(data);
             } catch (error) {

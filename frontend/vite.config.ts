@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  base: "/Co-pilote-Process-V2/",
   server: {
     port: 5173,
     host: "0.0.0.0",

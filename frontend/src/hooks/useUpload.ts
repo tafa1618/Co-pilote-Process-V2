@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import type { UploadKpiResponse, User } from "../types";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+import { BACKEND_URL } from "../config/constants";
 const DEFAULT_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || "admin@neemba.com").trim().toLowerCase();
 const DEFAULT_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
 

@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { AuthState, User } from "../types";
 
-const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || "").trim().toLowerCase();
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
+import { ADMIN_EMAIL, ADMIN_PASSWORD } from "../config/constants";
 
 export function useAuth(): AuthState {
   const [user, setUser] = useState<User | null>(() => {

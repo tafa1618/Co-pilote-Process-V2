@@ -174,7 +174,7 @@ function ActionRow({
   );
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+import { BACKEND_URL } from "../config/constants";
 const DEFAULT_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || "admin@neemba.com").trim().toLowerCase();
 
 interface LeanAction {
@@ -276,11 +276,11 @@ export function SuiviSepMeeting({
         const error = await res.json().catch(() => ({ detail: "Erreur lors de la génération" }));
         throw new Error(error.detail || "Erreur lors de la génération");
       }
-      
+
       // Récupérer le Markdown
       const data = await res.json();
       setGeneratedMarkdown(data.markdown || "");
-      
+
       // Rafraîchir les archives
       await fetchArchives();
     } catch (err: any) {
@@ -313,7 +313,7 @@ export function SuiviSepMeeting({
         },
       });
       if (!res.ok) throw new Error("Erreur lors de la récupération");
-      
+
       const data = await res.json();
       setGeneratedMarkdown(data.markdown || "");
       // Scroll vers le rapport généré

@@ -1,5 +1,6 @@
 import React from "react";
 import { LogOut, Sparkles, Activity, TrendingUp } from "lucide-react";
+import { BACKEND_URL } from "../config/constants";
 import { AreaChart, Card, CategoryBar, ProgressCircle } from "@tremor/react";
 import UploadArea from "../components/UploadArea";
 import AgentInsightsPanel from "../components/AgentInsightsPanel";
@@ -104,7 +105,7 @@ export function Dashboard({ auth, onOpenProductivity, onOpenSepm, onOpenInspecti
       }
     };
 
-    fetch("http://localhost:8000/api/analyze/mock")
+    fetch(`${BACKEND_URL}/api/analyze/mock`)
       .then((res) => res.json())
       .then((data) => applyMockData(data))
       .catch((err) => {

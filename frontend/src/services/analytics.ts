@@ -10,7 +10,7 @@ export interface ProductivityPayload {
   monthly: { mois: string; productivite: number }[];
   teams: { ["Salarié - Equipe(Nom)"]: string; productivite: number }[];
   technicians: { ["Salarié - Nom"]: string; productivite: number }[];
-  heatmap: { mois: string; ["Salarié - Equipe(Nom)"]: string; productivite: number; delta_vs_month: number }[];
+  heatmap: { mois: string;["Salarié - Equipe(Nom)"]: string; productivite: number; delta_vs_month: number }[];
   correlation?: { equipe: string; score: number } | null;
   exhaustivity?: {
     periods: string[];
@@ -24,8 +24,7 @@ export interface ProductivityPayload {
   } | null;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
-const DEFAULT_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || "admin@neemba.com").trim().toLowerCase();
+import { BACKEND_URL, ADMIN_EMAIL as DEFAULT_EMAIL } from "../config/constants";
 
 export async function fetchProductivity(user: User | null): Promise<ProductivityPayload> {
   const email = (user?.email || DEFAULT_EMAIL).trim().toLowerCase();
