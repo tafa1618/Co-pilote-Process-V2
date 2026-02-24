@@ -15,7 +15,21 @@ class ProductivityDataLoader:
     """Load and validate productivity timesheet data"""
     
     def __init__(self, file_path: str = "data/productivite.xlsx"):
+        # Try multiple common locations
+        paths_to_try = [
+            Path(file_path),
+            Path("backend") / file_path,
+            Path("..") / "Data" / "productivite.xlsx",
+            Path("Data") / "productivite.xlsx"
+        ]
+        
         self.file_path = Path(file_path)
+        for p in paths_to_try:
+            if p.exists():
+                self.file_path = p
+                logger.info(f"Using data file at: {self.file_path}")
+                break
+        
         self.df_raw = None
         
     def load_data(self) -> pd.DataFrame:

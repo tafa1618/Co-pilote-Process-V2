@@ -12,7 +12,10 @@ router = APIRouter(prefix="/api/productivity", tags=["Productivity KPI"])
 @router.on_event("startup")
 async def startup_event():
     """Initialize productivity service on startup"""
-    productivity_service.initialize()
+    try:
+        productivity_service.initialize()
+    except Exception as e:
+        logger.error(f"Error during productivity service startup: {e}")
 
 
 @router.get("/daily")

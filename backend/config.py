@@ -10,7 +10,7 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD") or ""
 ENV = os.environ.get("ENV", "dev")
 
 # Default to localhost for local development (use 'db' in docker-compose)
-DATABASE_URL = os.environ.get("DATABASE_URL") or "postgresql://postgres:postgres@localhost:5432/kpi_db"
+DATABASE_URL = os.environ.get("DATABASE_URL") or "postgresql://postgres:postgres@localhost:5433/kpi_db"
 
 print(f"🔍 [DEBUG] DATABASE_URL: {DATABASE_URL}")  # Temporary debug
 

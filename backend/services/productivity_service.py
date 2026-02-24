@@ -34,18 +34,24 @@ class ProductivityService:
         
         logger.info("Initializing Productivity Service...")
         
-        # Load data
-        self.df_raw, summary = self.loader.load_and_prepare()
-        
-        # Calculate daily productivity
-        self.calculator = ProductivityCalculator(self.df_raw)
-        self.df_daily = self.calculator.calculate_productivity_daily()
-        
-        # Initialize exhaustivity controller
-        self.controller = ExhaustivityController(self.df_daily)
-        
-        self._initialized = True
-        logger.info("Productivity Service initialized successfully")
+        try:
+            # Load data
+            self.df_raw, summary = self.loader.load_and_prepare()
+            
+            # Calculate daily productivity
+            self.calculator = ProductivityCalculator(self.df_raw)
+            self.df_daily = self.calculator.calculate_productivity_daily()
+            
+            # Initialize exhaustivity controller
+            self.controller = ExhaustivityController(self.df_daily)
+            
+            self._initialized = True
+            logger.info("Productivity Service initialized successfully")
+        except FileNotFoundError as e:
+            logger.error(f"Failed to initialize Productivity Service: {e}")
+            logger.info("Service will start without data. Please ensure the data file exists.")
+        except Exception as e:
+            logger.error(f"Unexpected error during Productivity Service initialization: {e}")
     
     def get_productivity_daily(self, salarie_id: Optional[int] = None,
                               equipe: Optional[str] = None,
